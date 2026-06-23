@@ -9,7 +9,7 @@
 
 | Member | Role |
 |---|---|
-| Isha | Team Lead |
+| Isha | Integration & Documentation |
 | Ruchi Shah | Member — Adam optimizer track |
 | Dilkhush Yadav | Member — AdamW optimizer track |
 | Krutik Babariya | Member — RMSprop optimizer track |
