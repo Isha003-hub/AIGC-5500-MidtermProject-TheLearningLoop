@@ -9,10 +9,10 @@
 
 | Member | Role |
 |---|---|
-| Ruchi Shah | Team Lead |
-| Isha | Member |
-| Krutik Babariya | Member |
-| Dilkhush Yadav | Member |
+| Isha | Team Lead |
+| Ruchi Shah | Member — Adam optimizer track |
+| Dilkhush Yadav | Member — AdamW optimizer track |
+| Krutik Babariya | Member — RMSprop optimizer track |
 
 ---
 
@@ -20,27 +20,22 @@
 
 This project implements a systematic comparison of three modern deep learning optimizers — **Adam**, **RMSprop**, and **AdamW** — trained on the **KMNIST (Kuzushiji-MNIST)** dataset using a fixed feedforward neural network. The goal is to analyze how each optimizer behaves under different hyperparameter settings and draw evidence-based conclusions about their relative strengths and trade-offs.
 
+A structured hyperparameter search with **5-fold cross-validation** was used to identify the best configuration per optimizer. Final models were trained for 20 epochs and evaluated on a held-out test set.
+
 ---
 
 ## Repository Structure
 
 ```
-aigc5500-midterm-optimizers/
+TheLearningLoop-DL/
 │
-├── report/                  # Written PDF report
-│   └── report.pdf
+├── report/
+│   └── AIGC5500_Midterm_Project_Report.docx   # Written report
 │
-├── slides/                  # Presentation slides
-│   └── slides.pptx
+├── slides/
+│   └── AIGC5500_Midterm_Project_ppt.pptx      # Presentation slides
 │
-├── src/                     # All source code
-│   ├── data_loader.py       # Dataset download and preprocessing
-│   ├── model.py             # Fixed feedforward network architecture
-│   ├── train.py             # Training loop with cross-validation
-│   ├── optimizer_search.py  # Hyperparameter search for all three optimizers
-│   ├── evaluate.py          # Evaluation and metrics recording
-│   ├── plots.py             # All required visualizations
-│   └── main.ipynb           # End-to-end notebook with all results
+├── AIGC5500_Midterm_Master_Short_runned.ipynb  # End-to-end notebook with all results
 │
 └── README.md
 ```
@@ -54,10 +49,10 @@ aigc5500-midterm-optimizers/
 | Input | 784 neurons (flattened 28×28) |
 | Hidden 1 | 128 neurons, ReLU |
 | Hidden 2 | 64 neurons, ReLU |
-| Output | 10 neurons, Softmax |
+| Output | 10 neurons (raw logits; softmax applied by loss) |
 | Loss Function | Cross-Entropy Loss |
 
-> The architecture is fixed across all runs — all differences between optimizer results are attributable solely to the optimizer and its hyperparameters.
+> The architecture is **fixed across all runs** — all differences between optimizer results are attributable solely to the optimizer and its hyperparameters.
 
 ---
 
@@ -65,13 +60,32 @@ aigc5500-midterm-optimizers/
 
 **KMNIST (Kuzushiji-MNIST)** — loaded via `torchvision.datasets.KMNIST`
 
-- 60,000 training samples / 10,000 test samples
-- 28×28 greyscale images, 10 classes (Japanese Hiragana characters)
-- More challenging than MNIST due to overlapping class boundaries
+| Property | Value |
+|---|---|
+| Training samples | 60,000 |
+| Test samples | 10,000 |
+| Image size | 28×28 greyscale |
+| Classes | 10 (cursive Japanese hiragana characters) |
+| Difficulty | Harder than MNIST — class boundaries overlap |
 
 ---
 
-## Environment Setup
+## Environment
+
+| Library | Version |
+|---|---|
+| Python | 3.12.13 |
+| PyTorch | 2.11.0+cu128 |
+| Torchvision | 0.26.0+cu128 |
+| NumPy | 1.x |
+| scikit-learn | 1.x |
+| matplotlib | 3.x |
+
+> Experiments were run on a **CUDA GPU** (cu128 build). To run on CPU only, install the CPU build of PyTorch from [pytorch.org](https://pytorch.org/get-started/locally/) — results may differ slightly due to floating-point non-determinism across devices.
+
+---
+
+## Setup
 
 ### Prerequisites
 
@@ -90,31 +104,17 @@ Or install all at once:
 pip install -r requirements.txt
 ```
 
-> **Note:** If you have a GPU, install the CUDA-compatible version of PyTorch from [pytorch.org](https://pytorch.org/get-started/locally/).
-
 ---
 
 ## How to Reproduce Results
 
 All results in the report can be reproduced by running the notebook from top to bottom with no modifications.
 
-### Option 1 — Jupyter Notebook (recommended)
-
 ```bash
-cd src
-jupyter notebook main.ipynb
+jupyter notebook AIGC5500_Midterm_Master_Short_runned.ipynb
 ```
 
 Run all cells from top to bottom (`Kernel → Restart & Run All`).
-
-### Option 2 — Command Line
-
-```bash
-cd src
-python train.py          # Trains all optimizer configurations
-python evaluate.py       # Records metrics
-python plots.py          # Generates all required plots
-```
 
 ---
 
@@ -132,40 +132,27 @@ This seed is set at the top of every script and at the start of the notebook. It
 
 ## Optimizers Investigated
 
-| Optimizer | Default LR | Key Hyperparameter Investigated |
+| Optimizer | Default LR | Hyperparameters Searched |
 |---|---|---|
-| Adam | 0.001 | Learning rate, β₁ |
-| RMSprop | 0.01 | Learning rate, decay factor α |
-| AdamW | 0.001 | Learning rate, weight_decay |
+| Adam | 0.001 | Learning rate ∈ {0.1, 0.01, 0.001, 0.0001}, β₁ ∈ {0.8, 0.9, 0.95} |
+| AdamW | 0.001 | Learning rate ∈ {0.1, 0.01, 0.001, 0.0001}, weight_decay ∈ {0.001, 0.01, 0.1} |
+| RMSprop | 0.01 | Learning rate ∈ {0.01, 0.005, 0.001, 0.0001}, α ∈ {0.9, 0.95, 0.99} |
 
-Each optimizer is evaluated across **at least 4 hyperparameter configurations**, using **5-fold cross-validation** on the training set. The best configuration is then used to train a final model on the full training set.
-
----
-
-## Library Versions
-
-| Library | Version |
-|---|---|
-| Python | 3.9.x |
-| PyTorch | 2.x |
-| torchvision | 0.x |
-| NumPy | 1.x |
-| scikit-learn | 1.x |
-| matplotlib | 3.x |
-
-> Update this table with your exact versions before final submission. Run `pip freeze > requirements.txt` to capture them.
+Each optimizer was evaluated across **at least 4 hyperparameter configurations** using **5-fold cross-validation** on the training set. The best configuration (highest mean CV accuracy) was then used to train a final model on the full training set for **20 epochs**.
 
 ---
 
-## Key Results (Summary)
+## Key Results
 
-> Fill this section in once experiments are complete.
+| Optimizer | Best Config | CV Acc (mean ± std) | Test Acc | Train Acc | Gen. Gap | Test Loss | Epoch to 80% |
+|---|---|---|---|---|---|---|---|
+| Adam | lr=0.001, β₁=0.8 | 95.22% ± 0.05 | 89.66% | 99.55% | 9.89 | 0.7584 | 1 |
+| **AdamW ★** | **lr=0.001, wd=0.01** | **95.09% ± 0.13** | **89.94%** | **99.64%** | **9.70** | **0.656** | **1** |
+| RMSprop | lr=0.001, α=0.99 | 95.14% ± 0.15 | 89.76% | 99.62% | 9.86 | 0.8221 | 1 |
 
-| Optimizer | Best Config | Val Accuracy (mean ± std) | Test Accuracy | Epochs to 80% |
-|---|---|---|---|---|
-| Adam | lr=?, β₁=? | — | — | — |
-| RMSprop | lr=?, α=? | — | — | — |
-| AdamW | lr=?, wd=? | — | — | — |
+**★ Winner: AdamW** — highest test accuracy (89.94%), smallest generalization gap (9.70), and lowest test loss (0.656).
+
+> **Key finding:** Learning rate was the most impactful hyperparameter across all three optimizers. All three peaked at lr=0.001. AdamW with lr=0.1 collapsed to ~16.5% CV accuracy (near-random), demonstrating high sensitivity to a badly-chosen learning rate.
 
 ---
 
@@ -173,7 +160,7 @@ Each optimizer is evaluated across **at least 4 hyperparameter configurations**,
 
 - Kingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. *ICLR 2015.*
 - Loshchilov, I., & Hutter, F. (2019). Decoupled weight decay regularization. *ICLR 2019.*
-- Tieleman, T., & Hinton, G. (2012). Lecture 6.5 - RMSProp. *COURSERA: Neural Networks for Machine Learning.*
+- Tieleman, T., & Hinton, G. (2012). Lecture 6.5 — RMSProp. *Coursera: Neural Networks for Machine Learning.*
 - Clanuwat, T. et al. (2018). Deep learning for classical Japanese literature. *NeurIPS 2018 Workshop.*
 
 ---
