@@ -35,7 +35,7 @@ TheLearningLoop-DL/
 ├── slides/
 │   └── AIGC5500_Midterm_Project_ppt.pptx      # Presentation slides
 │
-├── AIGC5500_Midterm_Master_Short_runned.ipynb  # End-to-end notebook with all results
+├── AIGC5500_Midterm_Final.ipynb.ipynb  # End-to-end notebook with all results
 │
 └── README.md
 ```
@@ -111,7 +111,7 @@ pip install -r requirements.txt
 All results in the report can be reproduced by running the notebook from top to bottom with no modifications.
 
 ```bash
-jupyter notebook AIGC5500_Midterm_Master_Short_runned.ipynb
+jupyter notebook AIGC5500_Midterm_Final.ipynb.ipynb
 ```
 
 Run all cells from top to bottom (`Kernel → Restart & Run All`).
